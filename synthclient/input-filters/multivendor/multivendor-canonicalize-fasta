@@ -1,0 +1,95 @@
+#!/bin/bash
+
+### Copyright 2021-2025 SecureDNA Stiftung (SecureDNA Foundation) <licensing@securedna.org>
+### SPDX-License-Identifier: MIT OR Apache-2.0
+###
+### Preprocesses modified-base nucleotides into unmodified DNA-only sequences for input to synthclient.
+### This is based on grammars from Eurofins and IDT and is not guaranteed to work with other vendors' formats.
+###
+### This logic is not included in synthclient because not all vendors use the same syntax for modified nucleotides,
+### and this makes it easier to modify on a per-vendor basis.  Feel free to use this script as a starting point
+### for your own preprocessor, or please reach out to SecureDNA and we will be happy to write you a custom
+### preprocessor based on a description of your particular modification syntax and grammar.  If your particular
+### modifications are a strict superset of the logic below, please let us know and we will add them to this script.
+### Otherwise, such an incompatible grammar should be implemented as a different filter, since there is no
+### way to know a priori which grammar to use.
+###
+### Usage:
+###   If some pathname FOO.fasta is specified as an argument, reads from FOO and writes to FOO-canonicalized.fasta.
+###   If no pathname is specified, acts as a filter, reading from stdin and writing to stdout.
+###
+### Notes:
+###   * Although synthclient itself does not care about alphabetic case, the modification grammar clearly does.
+###     If the sequences you supply have been downcased, then the "mA" and "rA" rules may fire inadvertently
+###     on what you meant to be wobbles.  Do not use this script on sequences which assume case-independence.
+###   * This script makes no guarantees for inputs which violate the known grammar.
+###     For example, "a[]t" is transformed, to "aNNt", breaking frame alignment.
+###   * Nonstandard wobbles, such as "I" or "[I]", will be transformed into N.
+###   * Non-ASCII Unicode which is not in a header line will be replaced with N.
+###     The synthclient specification mandates that all nucleotides be in ASCII.
+###   * Whitespace (spaces, tabs, and newlines) are preserved.
+### 
+### References, although these pages do not completely describe the syntax and grammar:
+###   * https://eurofinsgenomics.com/en/products/dnarna-synthesis/wobbles-degenerate-bases/
+###   * https://www.idtdna.com/site/catalog/modifications/
+###   * https://www.idtdna.com/pages/education/decoded/article/ordering-modified-oligonucleotides
+###   * https://www.idtdna.com/pages/products/custom-dna-rna/custom-rna-oligos/rna-oligos
+###   * https://cran.r-project.org/web/packages/MLMOI/vignettes/StandardAmbiguityCodes.html
+###     [latter includes, e.g., Z, which is not standard for synthesis, but is a nice chart]
+###   * Personal communications from various synthesis vendors.
+
+generic='N'				# If you'd rather replace noncanonical DNA with something else, change this.
+
+## ++ The code below implements a tiny domain-specific language for describing source-to-source transformations of the input.
+##    Note that the order in which the transformations execute is critical, so don't arbitrarily reorder calls to add().
+declare -a t				# Each element of this is a perl statement.  Execution order matters.
+add()    { t+=(-e "$1 if not /^>/;"); }	# Apply each transformation to any non-header (>) line.
+addw()   { add "s@\[$1\]@$2@gi"; }	# Replace "[$1]" with a single wobble $2.
+filter() { perl -p "${t[@]}"; }		# Apply all transformations.
+
+## + Handle handmixed wobbles (including "[100-0-0-0]" et al, just in case someone's being cute).
+##   Note that we allow absurdities like "[100-100-100-100]" or "[1-1-1-1]", which (for example) map to N.
+nz='0*[1-9][0-9]*'			# Any number of digits with a nonzero value, possibly with leading zeroes.
+ze='0+'					# Any string of all zeros.
+addw "$nz-$ze-$ze-$ze" A
+addw "$ze-$nz-$ze-$ze" C
+addw "$ze-$ze-$nz-$ze" G
+addw "$ze-$ze-$ze-$nz" T
+addw "$nz-$ze-$ze-$nz" W
+addw "$ze-$nz-$nz-$ze" S
+addw "$nz-$nz-$ze-$ze" M
+addw "$ze-$ze-$nz-$nz" K
+addw "$nz-$ze-$nz-$ze" R
+addw "$ze-$nz-$ze-$nz" Y
+addw "$ze-$nz-$nz-$nz" B
+addw "$nz-$ze-$nz-$nz" D
+addw "$nz-$nz-$ze-$nz" H
+addw "$nz-$nz-$nz-$ze" V
+addw "$nz-$nz-$nz-$nz" N
+addw "$ze-$ze-$ze-$ze" Z		# Completeness; this will be mapped to N as nonstandard in the last stage.
+
+## + Handle "[2OMeA]" formats for 2'-O-methylation.
+add "s@\[2OMe(.)\]@\1@gi"
+
+## + Now it's safe to remove all other square-bracketed modifications, as well as /.../ and //...//.
+add "s@\[[^[]+\]|//[^/]+//|/[^/]+/@@gi"
+
+## + Remove various prefixes or matched delimiters indicating RNA, 2'-O-methylation, PTO bonds, or LNA bases.
+##   For those which are RNA, we'll reverse-transcribe what's left in the next step.
+add "s@[{}()+*mr]@@g"			# Note "g" and not "gi": to preserve M & R wobbles, this must be case-dependent.
+
+## + Reverse-transcribe any remaining RNA bases.
+add "s@U@T@gi"
+
+## + Any remaining nonstandard bases are treated as N unless $generic above is set to something else.
+add "s@[^abcdghkmnrstvwy \t\n]@$generic@gi"
+
+## ++ Scaffolding to run the filter.
+newpath() { echo "$(dirname "$1")/$(basename "$1" .fasta)-canonicalized.fasta"; }
+process() { filter < "$1" > "$(newpath "$1")"; }
+run()     { if [[ -n "$1" ]]; then process "$1"; else filter; fi }
+
+## ++ Actually run everything.
+run "$1"
+
+# End of file.

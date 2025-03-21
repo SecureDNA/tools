@@ -1,0 +1,67 @@
+> All header lines should pass through the script unchanged; if not, it's a bug.
+> Note that some of the examples below are in lowercase.  synthclient is agnostic
+> about case, but this filter isn't, because some modifications are the same letter
+> as a wobble would be.  The lowercase examples here are explicitly *not* the same
+> as those wobbles, and exist mostly to demonstrate that in general we won't bash
+> lowercase bases which aren't the same as those modifications.  However, in general,
+> you should be using *only* uppsercase bases if you're going to be passing them
+> through this script, because the vendors' syntax cares.  Tests follow this header.
+
+> Whitespace is preserved.
+a c	g t
+
+> Nonstandard wobbles map to N.
+I
+
+> All possible handmixed wobbles.
+> This first one should map to Z, which will then map to N, because whatta ya doin'?
+> (Perhaps it should map to nothing, because this seems to specify "no base here.")
+[0-0-0-0]
+> Some of these are absurd, but we want to ensure that "impossible" values aren't
+> silently discarded, and we also want to ensure that zero-padding is correctly interpreted.
+[100-100-100-100]
+[000100-025-0-1]
+> The rest map to valid bases or wobbles.  Note that we use different numbers of zeroes to test.
+[100-0-00-00000]
+[0-00100-0-00]
+[00-0-100-0]
+[00-0-0-100]
+[50-00-00-50]
+[00-50-50-00]
+[50-50-00-00]
+[00-00-50-50]
+[50-00-50-00]
+[00-50-00-50]
+[00-25-25-50]
+[50-00-25-25]
+[25-25-00-50]
+[25-25-50-00]
+[25-25-25-25]
+
+> Various modifications.
+a[PHO]c
+a[PHO-Q]c
+g/PHO/t
+g/PHO-Q/t
+a//PHO//t
+a//PHO-Q//t
+
+> RNA bases.
+ACGT(ACGU)TGA
+ACGTrArCrGrUTGA
+
+> 2'-O-methylation.
+ACGTmAmCmGTGA
+ACGT[2OMeA]CGTGA
+ACGT[2OMeU]CGTGA
+
+> PTO bonds.
+a*c
+
+> LNA bases.
+ACGT{ACG}TGA
+ACGT+A+C+GTGA
+
+> Everything in a single string.
+a c	g tI[0-0-0-0][100-100-100-100][000100-025-0-1]
+[100-0-00-0][0-100-0-00][00-0-100-0][00-0-0-100][50-00-00-50][00-50-50-00][50-50-00-00][00-00-50-50][50-00-50-00][00-50-00-50][00-25-25-50][50-00-25-25][25-25-00-50][25-25-50-00][25-25-25-25]a[PHO]ca[PHO-Q]cg/PHO/tg/PHO-Q/ta//PHO//ta//PHO-Q//tACGT(ACG)TGAACGTrArCrGTGAACGTmAmCmGTGAACGT[2OMeA]CGTGAACGT[2OMeT]CGTGAa*cACGT{ACG}TGAACGT+A+C+GTGA

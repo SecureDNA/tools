@@ -1,0 +1,67 @@
+> All header lines should pass through the script unchanged; if not, it's a bug.
+> Note that some of the examples below are in lowercase.  synthclient is agnostic
+> about case, but this filter isn't, because some modifications are the same letter
+> as a wobble would be.  The lowercase examples here are explicitly *not* the same
+> as those wobbles, and exist mostly to demonstrate that in general we won't bash
+> lowercase bases which aren't the same as those modifications.  However, in general,
+> you should be using *only* uppsercase bases if you're going to be passing them
+> through this script, because the vendors' syntax cares.  Tests follow this header.
+
+> Whitespace is preserved.
+a c	g t
+
+> Nonstandard wobbles map to N.
+N
+
+> All possible handmixed wobbles.
+> This first one should map to Z, which will then map to N, because whatta ya doin'?
+> (Perhaps it should map to nothing, because this seems to specify "no base here.")
+N
+> Some of these are absurd, but we want to ensure that "impossible" values aren't
+> silently discarded, and we also want to ensure that zero-padding is correctly interpreted.
+N
+H
+> The rest map to valid bases or wobbles.  Note that we use different numbers of zeroes to test.
+A
+C
+G
+T
+W
+S
+M
+K
+R
+Y
+B
+D
+H
+V
+N
+
+> Various modifications.
+ac
+ac
+gt
+gt
+at
+at
+
+> RNA bases.
+ACGTACGTTGA
+ACGTACGTTGA
+
+> 2'-O-methylation.
+ACGTACGTGA
+ACGTACGTGA
+ACGTTCGTGA
+
+> PTO bonds.
+ac
+
+> LNA bases.
+ACGTACGTGA
+ACGTACGTGA
+
+> Everything in a single string.
+a c	g tNNNH
+ACGTWSMKRYBDHVNacacgtgtatatACGTACGTGAACGTACGTGAACGTACGTGAACGTACGTGAACGTTCGTGAacACGTACGTGAACGTACGTGA
