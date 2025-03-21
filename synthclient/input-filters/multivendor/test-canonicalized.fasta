@@ -4,7 +4,7 @@
 > as a wobble would be.  The lowercase examples here are explicitly *not* the same
 > as those wobbles, and exist mostly to demonstrate that in general we won't bash
 > lowercase bases which aren't the same as those modifications.  However, in general,
-> you should be using *only* uppsercase bases if you're going to be passing them
+> you should be using *only* uppercase bases if you're going to be passing them
 > through this script, because the vendors' syntax cares.  Tests follow this header.
 
 > Whitespace is preserved.
