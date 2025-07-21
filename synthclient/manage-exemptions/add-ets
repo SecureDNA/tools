@@ -36,7 +36,7 @@ for et_path in "$1"/*.et; do
 To fix this issue:
 1. Go to https://pages.securedna.org/exemption/request
 2. Recreate this customer's exemption request
-3. This time, when adding 2FA, click the TOTP QR code to copy the secret key to your clipboard.
+3. This time, when adding 2FA, click the TOTP QR code to copy the secret key to your clipboard
 4. Save the contents to \x1b[36m$secret_path\x1b[0m 
 5. Approve the exemption request at https://pages.securedna.org/exemption/approve
 6. Download the exemption token to \x1b[36m$et_path\x1b[0m
