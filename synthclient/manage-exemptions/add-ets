@@ -24,7 +24,7 @@ set -e
 
 die() { echo -e "$1" && exit 1; }
 
-command -v jq &> /dev/null || die "jq could not be found. Please install it:\n\n    https://stedolan.github.io/jq/\n"
+command -v jq &> /dev/null || die "jq could not be found. Please install it:\n\n    https://jqlang.org/\n"
 command -v totp-cli &> /dev/null || die "totp-cli could not be found. Please install it:\n\n    https://github.com/yitsushi/totp-cli\n"
 [ "$#" -eq 1 ] || die "Usage:  cat order.json | add-ets /path/to/customer/data"
 
