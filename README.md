@@ -19,3 +19,4 @@ so forth.
 - `synthclient/`: tools related to synthclient
   - `input-filters/`: tools which transform vendor-proprietary FASTA formats into the generic format accepted by `synthclient`
     - `multivendor/`: common filter for Eurofins/IDT formats
+  - `manage-exemptions/`: a tool for users who want to manage their customers' exemptions. It augments requests with 2FA OTPs.

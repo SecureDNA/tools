@@ -2,23 +2,27 @@
 
 # This script expects to be called as follows:
 #
-#     cat order.json                       \
-#       | add-ets /path/to/customer/data/  \
+#     cat order.json                         \
+#       | add-ets /data/customers/username   \
 #       > order-with-ets.json
 #
 # The input, `order.json`, should be a synthclient request:
 #
 #     {"region": "us", "fasta": "ACTGACTG"}
 #
-# For any given customer directory, the supplied customer data should be laid out as follows; this allows for multiple exemptions per customer:
+# The customer data should be laid out as follows.
 #
-#     foo-2025-01-01.et
-#     foo-2025-01-01.totp
-#     foo-2025-02-02.et
-#     foo-2025-02-02.totp
+#     customers/
+#       username/
+#         exemption-2025-01-01.et
+#         exemption-2025-01-01.secret
+#         exemption-2025-02-02.et
+#         exemption-2025-02-02.secret
 #
-# The result, `order-with-ets.json`, will have a new "ets" field
-# ready to be sent to synthclient.
+# The result, `order-with-ets.json`, will have a new "ets" field ready to be
+# sent to synthclient. When there are multiple exemption tokens stored in the
+# customer data, the resulting "ets" field will contain all of them, with
+# an OTP for each.
 
 set -e
 
