@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# This script expects to be called as follows:
+#
+#     cat order.json                       \
+#       | add-ets /path/to/customer/data/  \
+#       > order-with-ets.json
+#
+# The input, `order.json`, should be a synthclient request:
+#
+#     {"region": "us", "fasta": "ACTGACTG"}
+#
+# The supplied customer data folder should be laid out like:
+#
+#     foo-2025-01-01.et
+#     foo-2025-01-01.totp
+#     foo-2025-02-02.et
+#     foo-2025-02-02.totp
+#
+# The result, `order-with-ets.json`, will have a new "ets" field
+# ready to be sent to synthclient.
+
+set -e
+
+die() { echo -e "$1" && exit 1; }
+
+command -v jq &> /dev/null || die "jq could not be found. Please install it:\n\n    https://stedolan.github.io/jq/\n"
+command -v totp-cli &> /dev/null || die "totp-cli could not be found. Please install it:\n\n    https://github.com/yitsushi/totp-cli\n"
+[ "$#" -eq 1 ] || die "Usage:  cat order.json | add-ets /path/to/customer/data"
+
+ets=''
+for et_path in "$1"/*.et; do
+  secret_path="${et_path%.et}.secret"
+  [ -f "$secret_path" ] || die "\x1b[31mFatal error:\x1b[0m Secret file \x1b[36m$secret_path\x1b[0m is missing.
+
+To fix this issue:
+1. Go to https://pages.securedna.org/exemption/request
+2. Recreate this customer's exemption request
+3. This time, when adding 2FA, click the TOTP QR code to copy the secret key to your clipboard.
+4. Save the contents to \x1b[36m$secret_path\x1b[0m 
+5. Approve the exemption request at https://pages.securedna.org/exemption/approve
+6. Download the exemption token to \x1b[36m$et_path\x1b[0m
+7. Run this tool again
+"
+  et_json=$(cat "$et_path" | jq -sR)
+  otp_json=$(cat "$secret_path" | totp-cli instant | jq -sR 'rtrimstr("\n")') || die "\x1b[31mFatal error:\x1b[0m Failed to generate OTP for \x1b[36m$secret_path\x1b[0m"
+  ets+=",{\"et\": $et_json, \"requestor_otp\": $otp_json}"
+done
+
+# Add the "ets" field to the order, skipping the first comma.
+jq -c ".ets += [${ets:1}]"
