@@ -30,12 +30,12 @@ die() { >&2 echo -e "$1" && exit 1; }
 
 command -v jq &> /dev/null || die "jq could not be found. Please install it:\n\n    https://jqlang.org/\n"
 command -v totp-cli &> /dev/null || die "totp-cli could not be found. Please install it:\n\n    https://github.com/yitsushi/totp-cli\n"
-[ "$#" -eq 1 ] || die "Usage:  cat order.json | add-ets /path/to/customer/data"
+[[ "$#" -eq 1 ]] || die "Usage:  cat order.json | add-ets /path/to/customer/data"
 
 ets=''
 for et_path in "$1"/*.et; do
   secret_path="${et_path%.et}.secret"
-  [ -f "$secret_path" ] || die "\x1b[31mFatal error:\x1b[0m Secret file \x1b[36m$secret_path\x1b[0m is missing.
+  [[ -f "$secret_path" ]] || die "\x1b[31mFatal error:\x1b[0m Secret file \x1b[36m$secret_path\x1b[0m is missing.
 
 To fix this issue:
 1. Go to https://pages.securedna.org/exemption/request
