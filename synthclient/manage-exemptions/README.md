@@ -6,7 +6,7 @@ This tool is for SecureDNA users (e.g. DNA providers) who want to manage their c
 
 Ordinarily, when placing an order that has an exemption, customers submit a six-digit 2FA code that gets forwarded to synthclient and checked by SecureDNA. However, a provider may with to manage [exemption tokens](https://github.com/SecureDNA/SecureDNA/wiki/Requesting-exemptions) instead of handing them out to its customers. In this case, the provider becomes responsible not only for requesting and approving exemptions on behalf of its customers, but also for keeping the 2FA secrets and generating six-digit codes.
 
-This tool consists of a Bash shell script, `add-ets`, that helps out with this scenario.
+This tool consists of a Bash shell script, `add-ets`, that helps out with this scenario. It depends on [jq](http://jqlang.org/) and [totp-cli](https://github.com/yitsushi/totp-cli).
 
 ## Using this tool
 
