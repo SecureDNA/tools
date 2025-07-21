@@ -10,7 +10,7 @@
 #
 #     {"region": "us", "fasta": "ACTGACTG"}
 #
-# The supplied customer data folder should be laid out like:
+# For any given customer directory, the supplied customer data should be laid out as follows; this allows for multiple exemptions per customer:
 #
 #     foo-2025-01-01.et
 #     foo-2025-01-01.totp
