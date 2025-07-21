@@ -9,7 +9,7 @@ This repo holds various public tools related to
 point to hold ancillary ecosystem-related artifacts which are either
 updated on a different schedule than the main monorepo or which are
 contributed by synthesis vendors, customers, or biosafety
-officers. These may include input filters for handling
+authorities. These may include input filters for handling
 vendor-proprietary FASTA file formats, tools for generating exemption
 certificates in various ways, analyzing the output of synthclient, and
 so forth.
